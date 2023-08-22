@@ -1,3 +1,13 @@
+ ///
+ /// \file
+ /// \brief Solves equations (quadratic or linear)
+ /// \author Daniil Zelenov
+ /// \version 1.3
+ /// \date 22.08.2023
+ ///
+ /// This program takes 3 input values (type double) that represent coefficients of quadratic equation (ax^2 + bx + c = 0) and solves it
+ ///
+
 #include <TXLib.h>
 #include <stdio.h>
 #include <math.h>
@@ -7,19 +17,38 @@ const int SS_INF_ROOTS = -1;
 const int SS_EQUAL_ROOTS = 3;
 const double DELTA = 0.0000000001;
 
-// Checks if the number is zero
-bool iszero(const double& num) {
+///
+/// \brief Checks if the number is zero
+/// \param num Input number
+/// \return Returns true if the number equals to zero and false if the number does not equal to zero
+///
+bool is_zero(const double num) {
+
+    assert(isfinite(num));
+    assert(!isnan(num));
 
     return (fabs(num) <= DELTA);
 
 }
 
-// Solves linear equation bx + c = 0
-int solve_linear(const double& b, const double& c, double& x){
+///
+/// \brief Solves linear equation bx + c = 0
+///
+/// Takes in 2 coefficients of the equation and a pointer to the variable, where the answer will be stored, and solves the equation
+/// \param b, c Coefficients of the equation
+/// \param x Pointer to the variable, where the answer is stored
+/// \return Returns the amount of roots or SS_INF_ROOTS if there are infinite amount of roots
+///
+int solve_linear(const double b, const double c, double* x){
 
-    if (iszero(b)) {
+    assert(isfinite(b));
+    assert(isfinite(c));
+    assert(!isnan(b));
+    assert(!isnan(c));
 
-        if (iszero(c)) {
+    if (is_zero(b)) {
+
+        if (is_zero(c)) {
 
             return SS_INF_ROOTS;
 
@@ -30,38 +59,65 @@ int solve_linear(const double& b, const double& c, double& x){
         }
     } else {
 
-        x = - c / b;
+        *x = - c / b;
         return 1;
 
     }
 }
 
-int solve_square(const double& a, const double& b, const double& c, double& x1, double& x2) {
+///
+/// \brief Solves quadratic equation ax^2 + bx + c = 0
+/// Takes in 3 coefficients of the equation and 2 pointers to the variables, where the answers will be stored, and solves the equation
+/// \param a, b, c Coefficients of the equation
+/// \param x1, x2 Pointers to the variables, where the answer is stored
+/// \return Returns the amount of roots or SS_EQUAL_ROOTS if the roots are equal
+///
+int solve_square(const double a, const double b, const double c, double* x1, double* x2) {
+
+    assert(isfinite(a));
+    assert(isfinite(b));
+    assert(isfinite(c));
+    assert(!isnan(a));
+    assert(!isnan(b));
+    assert(!isnan(c));
 
     double disc = b * b - 4 * a * c;
 
-        if (iszero(disc)) {
+    if (is_zero(disc)) {
 
-            x1 = - b / (2 * a);
-            return SS_EQUAL_ROOTS;
+        *x1 = - b / (2 * a);
+        return SS_EQUAL_ROOTS;
 
-        } else if (disc < 0) {
+    } else if (disc < 0) {
 
-            return 0;
+        return 0;
 
-        } else {
+    } else {
 
-            x1 = (- b - sqrt(disc)) / (2 * a);
-            x2 = (- b + sqrt(disc)) / (2 * a);
-            return 2;
+        *x1 = (- b - sqrt(disc)) / (2 * a);
+        *x2 = (- b + sqrt(disc)) / (2 * a);
+        return 2;
 
-        }
+    }
 }
 
-// Determines the type of the equation (quadratic or linear) and solves it
-int solve(const double& a, const double& b, const double& c, double& x1, double& x2) {
+///
+/// \brief Determines the type of the equation (quadratic or linear) and solves it
+/// Takes in 3 coefficients of the equation and 2 pointers to the variables, where the answer will be stored, determines the type of equation and solves it using solve_linear and solve_square functions
+/// \param a, b, c Coefficients of the equation
+/// \param x1, x2 Pointers to the variables, where the answer is stored
+/// \return Returns the number of roots, SS_INF_ROOTS if there are infinite amount of roots and SS_EQUAL_ROOTS if the roots are equal
+///
+int solve(const double a, const double b, const double c, double* x1, double* x2) {
 
-    if (iszero(a)) {
+    assert(isfinite(a));
+    assert(isfinite(b));
+    assert(isfinite(c));
+    assert(!isnan(a));
+    assert(!isnan(b));
+    assert(!isnan(c));
+
+    if (is_zero(a)) {
 
         return solve_linear(b, c, x1);
 
@@ -72,8 +128,18 @@ int solve(const double& a, const double& b, const double& c, double& x1, double&
     }
 }
 
-// Prints out the roots of the equation if there are any
-void print_roots(int const num_of_roots, const double& x1, const double& x2) {
+///
+/// \brief Prints out the roots
+/// Takes in the amount of roots, the roots and prints out the corresponding answer:
+/// - no real solutions
+/// - 1 solution and its value
+/// - 2 solutions but they're equal and their value
+/// - 2 different solutions and their value
+/// - infinite amount of solutions
+/// \param num_of_roots Amount of roots
+/// \param x1, x2 The roots
+///
+void print_roots(int const num_of_roots, const double x1, const double x2) {
 
     switch(num_of_roots) {
 
@@ -108,20 +174,8 @@ int main() {
     double a = 0, b = 0, c = 0;
     scanf("%lg %lg %lg", &a, &b, &c);
 
-    assert(isfinite(a));
-    assert(isfinite(b));
-    assert(isfinite(c));
-    assert(!isnan(a));
-    assert(!isnan(b));
-    assert(!isnan(c));
-
     double x1 = 0, x2 = 0;
-    int num_of_roots = solve(a, b, c, x1, x2);
-
-    assert(isfinite(x1));
-    assert(isfinite(x2));
-    assert(!isnan(x1));
-    assert(!isnan(x2));
+    int num_of_roots = solve(a, b, c, &x1, &x2);
 
     print_roots(num_of_roots, x1, x2);
 
